@@ -6,11 +6,14 @@ admin.initializeApp();
 
 
 const firebaseConfig = {
-
+    apiKey: "AIzaSyBTwkJs1tMtvDlw14rtDn19MK11Fs-AAhA",
+    authDomain: "social-post-4e48b.firebaseapp.com",
+    projectId: "social-post-4e48b",
+    storageBucket: "social-post-4e48b.appspot.com",
+    messagingSenderId: "89891502783",
+    appId: "1:89891502783:web:350485321e820ddc87e40a",
+    measurementId: "G-57R4WQVPM7"
   };
-
-
-
 
 
 const firebase = require('firebase')
@@ -70,7 +73,7 @@ app.get('/screams', (req, res)=>{
          handle: req.body.handle
      }
  // Validate Data
-
+let token, userId;
 db.doc(`/users/${newUser.handle}`).get()
     .then(doc=>{
         if(doc.exists){
@@ -81,12 +84,23 @@ db.doc(`/users/${newUser.handle}`).get()
             .createUserWithEmailAndPassword(newUser.email, newUser.password)
         }
     })
-    .then(data=>{
+    .then((data)=>{
+        userId = data.user.uid;
        return data.user.getIdToken();
         
     })
-    .then(token=>{
-       return res.status(201).json({token});
+    .then((idToken)=>{
+     token = idToken;
+       const userCredentials ={
+           handle: newUser.handle,
+           email: newUser.email,
+           createdAt : new Date().toISOString(),
+           userId
+       };
+    return db.doc(`/users/${newUser.handle}`).set(userCredentials);
+    })
+    .then(()=>{
+        return res.status(201).json({ token });
     })
     .catch(err=> {
         console.error(err);
