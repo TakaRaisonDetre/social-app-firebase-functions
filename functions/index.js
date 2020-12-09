@@ -6,7 +6,13 @@ admin.initializeApp();
 
 
 const firebaseConfig = {
-    
+    apiKey: "AIzaSyBTwkJs1tMtvDlw14rtDn19MK11Fs-AAhA",
+    authDomain: "social-post-4e48b.firebaseapp.com",
+    projectId: "social-post-4e48b",
+    storageBucket: "social-post-4e48b.appspot.com",
+    messagingSenderId: "89891502783",
+    appId: "1:89891502783:web:350485321e820ddc87e40a",
+    measurementId: "G-57R4WQVPM7"
   };
 
 
@@ -57,15 +63,43 @@ app.get('/screams', (req, res)=>{
     })
  }) 
 
- // sign up route
+//helper 
+const isEmpty = (string)=>{
+    if(string.trim()==='') return true;
+    else return false
+}
+const isEmail = (email) =>{
+    const regEx =/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+    if(email.match(regEx)) return true;
+    else return false;
+}
 
+
+
+ // sign up route
  app.post('/signup', (req, res)=>{
      const newUser={
          email: req.body.email,
          password : req.body.password,
          confirmPassword : req.body.confirmPassword,
          handle: req.body.handle
-     }
+     };
+
+// initialie error object     
+let errors = {};
+
+if(isEmpty(newUser.email)){
+    errors.email ="must not be empty"
+} else if (!isEmail(newUser.email)){
+    errors.email = "must be valid email address"
+}
+
+if(isEmpty(newUser.password)) errors.password = "must not be empty"
+if(newUser.password !== newUser.confirmPassword) errors.confirmPassword = "Password must match"
+if(isEmpty(newUser.handle)) errors.handle = "must not be empty"
+
+if(Object.keys(errors).length>0) return res.status(400).json(errors)
+
  // Validate Data
 let token, userId;
 db.doc(`/users/${newUser.handle}`).get()
