@@ -9,11 +9,17 @@ const app = express();
 app.get('/screams', (req, res)=>{
     admin.firestore()
     .collection('screams')
+    .orderBy('createdAt', 'desc')
     .get()
     .then(data=>{
         let screams =[]
         data.forEach(doc=>{
-            screams.push(doc.data());
+            screams.push({
+                screamId: doc.id,
+                body: doc.data().body,
+                userHandle : doc.data().userHandle,
+                createdAt : doc.data().createdAt
+            });
         });
         return res.json(screams);
     })
@@ -22,14 +28,12 @@ app.get('/screams', (req, res)=>{
 
 
 
- exports.createScream = functions.https.onRequest((req, res)=>{
-    if(req.method!=='POST'){
-        return res.status(400).json({error: "Method not allowed"});
-    }
+ app.post('/screams', (req, res)=>{
+ 
     const newScream ={
         body:req.body.body,
         userHandle : req.body.userHandle,
-        createdAt : admin.firestore.Timestamp.fromDate(new Date())
+        createdAt : new Date().toISOString()
     }
 
     admin.firestore()
